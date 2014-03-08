@@ -53,6 +53,12 @@ public:
   update_custom_stock_button(Gtk::Button *btn, const char *label_text,
                              const Gtk::StockID& stock_id);
 
+#ifdef HAVE_GTK3
+//get_preferred_height and some other APIs are unavailable in gtkmm2
+  static bool
+  increase_button_border(Gtk::Button *btn, int requested_height);
+#endif
+
   static Gtk::Widget *
   create_label_with_icon(std::string text, const char *icon);
 

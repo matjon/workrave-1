@@ -146,6 +146,37 @@ GtkUtil::create_image_button(const char *label_text,
   return btn;
 }
 
+#ifdef HAVE_GTK3
+//get_preferred_height and some other APIs are unavailable in gtkmm2
+bool
+GtkUtil::increase_button_border(Gtk::Button *btn, int requested_height)
+{
+  TRACE_ENTER_MSG("GtkUtil::increase_button_border", requested_height);
+  int btn_min_height;
+  int btn_pref_height;
+  btn->get_preferred_height(btn_min_height, btn_pref_height);
+  TRACE_MSG2("button heights: min = ", btn_min_height);
+  TRACE_MSG2("button heights: pref = ", btn_pref_height);
+
+  int height_diff = requested_height - btn_pref_height;
+  if (height_diff <= 0)
+    {
+      TRACE_RETURN("heights_diff <= 0")
+      return false;
+    }
+
+  int btn_min_width;
+  int btn_pref_width;
+  btn->get_preferred_width(btn_min_width, btn_pref_width);
+
+  btn->set_size_request(btn_pref_width + height_diff, btn_pref_height + height_diff);
+
+  btn->get_size_request(btn_pref_width, btn_pref_height);
+  TRACE_MSG2("new button heights: pref = ", btn_pref_height);
+
+  return true;
+}
+#endif
 
 
 Gtk::Widget *
@@ -416,3 +447,4 @@ GtkWindow *GtkUtil::get_visible_tooltip_window()
     g_list_free( list );
     return func_retval;
 }
+

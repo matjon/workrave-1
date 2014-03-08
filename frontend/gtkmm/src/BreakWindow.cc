@@ -596,7 +596,9 @@ Gtk::Box *
 BreakWindow::create_bottom_box(bool lockable,
                                   bool shutdownable)
 {
+  TRACE_ENTER("BreakWindow::create_break_buttons");
   Gtk::HBox *box = NULL;
+  Gtk::HButtonBox *button_box = NULL;
 
   accel_group = Gtk::AccelGroup::create();
   add_accel_group(accel_group);
@@ -607,7 +609,7 @@ BreakWindow::create_bottom_box(bool lockable,
 
       if (break_flags != BREAK_FLAGS_NONE)
         {
-          Gtk::HButtonBox *button_box = new Gtk::HButtonBox(Gtk::BUTTONBOX_END, 6);
+          button_box = new Gtk::HButtonBox(Gtk::BUTTONBOX_END, 6);
           if ((break_flags & BREAK_FLAGS_SKIPPABLE) != 0)
             {
               skip_button = create_skip_button();
@@ -622,19 +624,49 @@ BreakWindow::create_bottom_box(bool lockable,
           box->pack_end(*button_box, Gtk::PACK_SHRINK, 0);
         }
 
-      //#ifdef HAVE_GTK3
       if (lockable)
         {
           sysoper_combobox = create_sysoper_combobox(shutdownable);
           if (sysoper_combobox != NULL)
             {
               box->pack_end(*sysoper_combobox, Gtk::PACK_SHRINK, 0);
+
+//get_preferred_height is unavailable in gtkmm2
+#ifdef HAVE_GTK3
+              if (button_box != NULL)
+                {
+                  int combo_min_height;
+                  int combo_pref_height;
+                  sysoper_combobox->get_preferred_height(combo_min_height, combo_pref_height);
+                  TRACE_MSG2("sysoper_combobox - min height = ", combo_min_height);
+                  TRACE_MSG2("sysoper_combobox - preferred height = ", combo_pref_height);
+
+                  //we increase the height of everything additionally
+                  // by 1 in hope that this will fix the
+                  // theme so that the buttons and the combobox will have the same height
+                  if (postpone_button != NULL)
+                    {
+                      GtkUtil::increase_button_border(postpone_button, combo_pref_height + 1);
+                    }
+
+                  if (skip_button != NULL)
+                    {
+                      GtkUtil::increase_button_border(skip_button, combo_pref_height + 1);
+                    }
+
+                  sysoper_combobox->set_size_request(-1, combo_pref_height + 1);
+                  sysoper_combobox->set_margin_bottom(0);
+                  sysoper_combobox->set_margin_top(0);
+
+                  button_box->set_border_width(0);
+                  button_box->set_size_request(-1, combo_pref_height + 1);
+                }
+#endif
             }
         }
-      //#endif
-
     }
 
+  TRACE_EXIT();
   return box;
 }
 
