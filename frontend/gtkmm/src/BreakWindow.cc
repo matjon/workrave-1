@@ -598,7 +598,6 @@ BreakWindow::create_bottom_box(bool lockable,
 {
   TRACE_ENTER("BreakWindow::create_break_buttons");
   Gtk::HBox *box = NULL;
-  Gtk::HButtonBox *button_box = NULL;
 
   accel_group = Gtk::AccelGroup::create();
   add_accel_group(accel_group);
@@ -609,19 +608,17 @@ BreakWindow::create_bottom_box(bool lockable,
 
       if (break_flags != BREAK_FLAGS_NONE)
         {
-          button_box = new Gtk::HButtonBox(Gtk::BUTTONBOX_END, 6);
           if ((break_flags & BREAK_FLAGS_SKIPPABLE) != 0)
             {
               skip_button = create_skip_button();
-              button_box->pack_end(*skip_button, Gtk::PACK_SHRINK, 0);
+              box->pack_end(*skip_button, Gtk::PACK_SHRINK, 0);
             }
 
           if ((break_flags & BREAK_FLAGS_POSTPONABLE) != 0)
             {
               postpone_button = create_postpone_button();
-              button_box->pack_end(*postpone_button, Gtk::PACK_SHRINK, 0);
+              box->pack_end(*postpone_button, Gtk::PACK_SHRINK, 0);
             }
-          box->pack_end(*button_box, Gtk::PACK_SHRINK, 0);
         }
 
       if (lockable)
@@ -633,8 +630,6 @@ BreakWindow::create_bottom_box(bool lockable,
 
 //get_preferred_height is unavailable in gtkmm2
 #ifdef HAVE_GTK3
-              if (button_box != NULL)
-                {
                   int combo_min_height;
                   int combo_pref_height;
                   sysoper_combobox->get_preferred_height(combo_min_height, combo_pref_height);
@@ -657,10 +652,6 @@ BreakWindow::create_bottom_box(bool lockable,
                   sysoper_combobox->set_size_request(-1, combo_pref_height + 1);
                   sysoper_combobox->set_margin_bottom(0);
                   sysoper_combobox->set_margin_top(0);
-
-                  button_box->set_border_width(0);
-                  button_box->set_size_request(-1, combo_pref_height + 1);
-                }
 #endif
             }
         }
